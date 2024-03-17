@@ -47,12 +47,13 @@ func (t *Tools) UploadFiles(r *http.Request, uploadDir string, rename ...bool) (
 	var uploadedFiles []*UploadedFile
 
 	if t.MaxFileSize == 0 {
-		t.MaxFileSize = 1024 * 1024 * 1024
+		t.MaxFileSize = 1024 * 1024 * 100
 	}
 
 	err := r.ParseMultipartForm(int64(t.MaxFileSize))
 	if err != nil {
-		return nil, errors.New("the uploaded file is too big")
+		return nil, errors.New("the uploaded file is too big (> 100 MB)")
+		// return nil, errors.New("the uploaded file is too big")
 	}
 
 	for _, fHeaders := range r.MultipartForm.File {
@@ -87,6 +88,7 @@ func (t *Tools) UploadFiles(r *http.Request, uploadDir string, rename ...bool) (
 
 				if !allowed {
 					return nil, errors.New("the uploaded file type is not permitted")
+					// return nil, errors.New("the uploaded file type is not permitted")
 				}
 
 				_, err = infile.Seek(0, 0)
@@ -100,6 +102,9 @@ func (t *Tools) UploadFiles(r *http.Request, uploadDir string, rename ...bool) (
 					uploadedFile.NewFileName = hdr.Filename
 				}
 				
+				// Fixed error - now Orifinal Filenames  will be shown
+				uploadedFile.OriginalFileName = hdr.Filename
+
 				var outfile *os.File
 				defer outfile.Close()
 
